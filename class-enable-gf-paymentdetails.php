@@ -80,7 +80,7 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 	}
 
 	public function add_payment_details_meta_box( $meta_boxes, $entry, $form ) {
-		if ( ! isset( $meta_boxes['payment'] ) ) {
+		if ( ! isset( $meta_boxes['payment'] ) && $this->payment_details_enabled( $form ) ) {
 			GFAPI::update_entry_property( $entry['id'], 'payment_status', 'Processing' );
 			GFAPI::update_entry_property( $entry['id'], 'transaction_type', '1' );
 			$entry['payment_status']   = 'Processing';
@@ -188,6 +188,10 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 	}
 
 	public function payment_details_editing_disabled( $entry, $action = 'edit' ) {
+		if ( ! $this->payment_details_enabled() ) {
+			return true;
+		}
+
 		$form_action = strtolower( rgpost( 'save' ) );
 		$gateway     = gform_get_meta( $entry['id'], 'payment_gateway' );
 
