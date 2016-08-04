@@ -4,7 +4,7 @@
 Plugin Name: Enable Gravity Forms Payment Details
 Plugin URI:
 Description: Adds a form setting allowing the Payment Details panel to be enabled on the entry detail page for entries not processed by a payment add-on.
-Version: 0.1
+Version: 0.2
 Author: Richard Wawrzyniak
 Author URI: http://www.wawrzyniak.me
 ------------------------------------------------------------------------

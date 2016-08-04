@@ -2,13 +2,17 @@
 GFForms::include_addon_framework();
 
 class Enable_GF_PaymentDetails extends GFAddOn {
-	protected $_version = '0.1';
+	protected $_version = '0.2';
 	protected $_min_gravityforms_version = '2.0';
 	protected $_slug = 'enablegfpaymentdetails';
 	protected $_path = 'enablegfpaymentdetails/enablegfpaymentdetails.php';
 	protected $_full_path = __FILE__;
 	protected $_title = 'Enable Gravity Forms Payment Details';
 	protected $_short_title = 'GF Payment Details';
+
+	protected $_capabilities_form_settings = 'enablegfpaymentdetails_settings';
+	protected $_capabilities_uninstall = 'enablegfpaymentdetails_uninstall';
+	protected $_capabilities = array( 'enablegfpaymentdetails_settings', 'enablegfpaymentdetails_uninstall' );
 
 	private static $_instance = null;
 
