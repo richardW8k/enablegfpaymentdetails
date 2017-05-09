@@ -2,7 +2,7 @@
 GFForms::include_addon_framework();
 
 class Enable_GF_PaymentDetails extends GFAddOn {
-	protected $_version = '0.2';
+	protected $_version = '0.3';
 	protected $_min_gravityforms_version = '2.0';
 	protected $_slug = 'enablegfpaymentdetails';
 	protected $_path = 'enablegfpaymentdetails/enablegfpaymentdetails.php';
@@ -43,6 +43,8 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 			add_action( 'gform_payment_transaction_id', array( $this, 'admin_edit_payment_transaction_id' ), 10, 3 );
 			add_action( 'gform_payment_amount', array( $this, 'admin_edit_payment_amount' ), 10, 3 );
 			add_action( 'gform_after_update_entry', array( $this, 'admin_update_payment' ), 10, 2 );
+
+			add_filter( 'gform_notification_events', array( $this, 'notification_events' ), 10, 2 );
 		}
 	}
 
@@ -189,6 +191,10 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 
 		//adding a note
 		$this->add_note( $entry['id'], sprintf( __( 'Payment information was manually updated. Status: %s. Amount: %s. Transaction Id: %s. Date: %s', 'gravityformspaypal' ), $payment_status, GFCommon::to_money( $payment_amount, $entry['currency'] ), $payment_transaction, $payment_date ) );
+
+		if ( $payment_status === 'Paid' ) {
+			GFAPI::send_notifications( $form, $entry, 'complete_payment' );
+		}
 	}
 
 	public function payment_details_editing_disabled( $entry, $action = 'edit' ) {
@@ -196,10 +202,44 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 			return true;
 		}
 
-		$form_action = strtolower( rgpost( 'save' ) );
-		$gateway     = gform_get_meta( $entry['id'], 'payment_gateway' );
+		$gateway = gform_get_meta( $entry['id'], 'payment_gateway' );
+		if ( ! empty( $gateway ) || rgar( $entry, 'payment_status' ) !== 'Processing' ) {
+			// Entry was processed by a payment add-on, don't allow editing.
+			return true;
+		}
 
-		return ! empty( $gateway ) || $form_action <> $action || rgar( $entry, 'payment_status' ) != 'Processing';
+		if ( $action == 'edit' && rgpost( 'screen_mode' ) == 'edit' ) {
+			// Editing is allowed for this entry.
+			return false;
+		}
+
+		if ( $action == 'update' && rgpost( 'screen_mode' ) == 'view' && rgpost( 'action' ) == 'update' ) {
+			// Updating the payment details for this entry is allowed.
+			return false;
+		}
+
+		// In all other cases editing is not allowed.
+
+		return true;
+	}
+
+	/**
+	 * Add notifications events supported by Add-On to notification events list.
+	 *
+	 * @access public
+	 *
+	 * @param array $events
+	 * @param array $form
+	 *
+	 * @return array $events
+	 */
+	public function notification_events( $events, $form ) {
+		if ( ! isset( $events['complete_payment'] ) ) {
+			$events['complete_payment'] = esc_html__( 'Payment Completed', 'gravityformspaypal' );
+		}
+
+		return $events;
+
 	}
 
 }
