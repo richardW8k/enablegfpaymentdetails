@@ -2,7 +2,7 @@
 GFForms::include_addon_framework();
 
 class Enable_GF_PaymentDetails extends GFAddOn {
-	protected $_version = '0.3';
+	protected $_version = '0.4';
 	protected $_min_gravityforms_version = '2.0';
 	protected $_slug = 'enablegfpaymentdetails';
 	protected $_path = 'enablegfpaymentdetails/enablegfpaymentdetails.php';
@@ -150,6 +150,8 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 		if ( empty( $payment_amount ) ) {
 			$payment_amount = GFCommon::get_order_total( $form, $entry );
 		}
+		
+		$payment_amount = GFCommon::to_money( $payment_amount, $entry['currency'] );
 
 		$input = '<input type="text" id="payment_amount" name="payment_amount" class="gform_currency" value="' . $payment_amount . '">';
 
@@ -173,7 +175,7 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 			$payment_status = $entry['payment_status'];
 		}
 
-		$payment_amount      = GFCommon::to_number( rgpost( 'payment_amount' ) );
+		$payment_amount      = GFCommon::to_number( rgpost( 'payment_amount' ), $entry['currency'] );
 		$payment_transaction = rgpost( 'custom_transaction_id' );
 		$payment_date        = rgpost( 'payment_date' );
 		if ( empty( $payment_date ) ) {
