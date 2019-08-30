@@ -63,6 +63,16 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 		return rgar( $settings, 'payment_details_enabled', false );
 	}
 
+	public function payment_details_allfeeds( $form = false ) {
+		if ( empty( $form ) ) {
+			$form = $this->get_current_form();
+		}
+
+		$settings = $this->get_form_settings( $form );
+
+		return rgar( $settings, 'payment_details_allfeeds', false );
+	}
+
 	public function form_settings_fields( $form ) {
 		return array(
 			array(
@@ -80,6 +90,18 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 							),
 						),
 					),
+					array(
+						'label'   => esc_html__( 'Enable For All Feeds', 'simpleaddon' ),
+						'type'    => 'checkbox',
+						'name'    => 'payment_details_allfeeds',
+						'choices' => array(
+							array(
+								'label'         => esc_html__( 'All Feeds', 'simpleaddon' ),
+								'name'          => 'payment_details_allfeeds',
+								'default_value' => false,
+							),
+						),
+					),
 				)
 			)
 		);
@@ -87,10 +109,14 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 
 	public function add_payment_details_meta_box( $meta_boxes, $entry, $form ) {
 		if ( ! isset( $meta_boxes['payment'] ) && $this->payment_details_enabled( $form ) ) {
-			GFAPI::update_entry_property( $entry['id'], 'payment_status', 'Processing' );
-			GFAPI::update_entry_property( $entry['id'], 'transaction_type', '1' );
-			$entry['payment_status']   = 'Processing';
-			$entry['transaction_type'] = '1';
+			if (!isset($entry['payment_status'])) {
+				GFAPI::update_entry_property( $entry['id'], 'payment_status', 'Processing' );
+				$entry['payment_status']   = 'Processing';
+			}
+			if (!isset($entry['transaction_type'])) {
+				GFAPI::update_entry_property( $entry['id'], 'transaction_type', '1' );
+				$entry['transaction_type'] = '1';
+			}
 			GFEntryDetail::set_current_entry( $entry );
 
 			$meta_boxes['payment'] = array(
@@ -205,7 +231,7 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 		}
 
 		$gateway = gform_get_meta( $entry['id'], 'payment_gateway' );
-		if ( ! empty( $gateway ) || rgar( $entry, 'payment_status' ) !== 'Processing' ) {
+		if (!$this->payment_details_allfeeds() && ( !empty( $gateway ) || rgar( $entry, 'payment_status' ) !== 'Processing' )) {
 			// Entry was processed by a payment add-on, don't allow editing.
 			return true;
 		}
