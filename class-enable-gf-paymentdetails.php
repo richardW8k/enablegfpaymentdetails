@@ -135,12 +135,16 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 		}
 
 		//create drop down for payment status
-		$payment_string = '<select id="payment_status" name="payment_status">';
-		$payment_string .= '<option value="' . $payment_status . '" selected>' . $payment_status . '</option>';
-		$payment_string .= '<option value="Paid">Paid</option>';
-		$payment_string .= '</select>';
-
-		return $payment_string;
+		if (strpos($payment_status, '<select') === false) {
+			$payment_string = '<select id="payment_status" name="payment_status">';
+			$payment_string .= '<option value="' . $payment_status . '" selected>' . $payment_status . '</option>';
+			$payment_string .= '<option value="Paid">Paid</option>';
+			$payment_string .= '</select>';
+			//remove_action('gform_payment_status', array($this, 'admin_edit_payment_status'));
+			return $payment_string;
+		} else {
+			return $payment_status;
+		}
 	}
 
 	public function admin_edit_payment_date( $payment_date, $form, $entry ) {
@@ -153,19 +157,26 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 			$payment_date = gmdate( 'y-m-d H:i:s' );
 		}
 
-		$input = '<input type="text" id="payment_date" name="payment_date" value="' . $payment_date . '">';
-
-		return $input;
+		if (strpos($payment_date, '<input') === false) {
+			$input = '<input type="text" id="payment_date" name="payment_date" value="' . $payment_date . '">';
+			//remove_action('gform_payment_date', array($this, 'admin_edit_payment_date'));
+			return $input;
+		} else {
+			return $payment_date;
+		}
 	}
 
 	public function admin_edit_payment_transaction_id( $transaction_id, $form, $entry ) {
 		if ( $this->payment_details_editing_disabled( $entry ) ) {
 			return $transaction_id;
 		}
-
-		$input = '<input type="text" id="custom_transaction_id" name="custom_transaction_id" value="' . $transaction_id . '">';
-
-		return $input;
+		if (strpos($transaction_id, '<input') === false) {
+			$input = '<input type="text" id="custom_transaction_id" name="custom_transaction_id" value="' . $transaction_id . '">';
+			//remove_action('gform_payment_transaction_id', array($this, 'admin_edit_payment_transaction_id'));
+			return $input;
+		} else {
+			return $transaction_id;
+		}
 	}
 
 	public function admin_edit_payment_amount( $payment_amount, $form, $entry ) {
@@ -177,11 +188,14 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 			$payment_amount = GFCommon::get_order_total( $form, $entry );
 		}
 		
-		$payment_amount = GFCommon::to_money( $payment_amount, $entry['currency'] );
-
-		$input = '<input type="text" id="payment_amount" name="payment_amount" class="gform_currency" value="' . $payment_amount . '">';
-
-		return $input;
+		if (strpos($payment_amount, '<input') === false) {
+			$payment_amount = GFCommon::to_money( $payment_amount, $entry['currency'] );
+			$input = '<input type="text" id="payment_amount" name="payment_amount" class="gform_currency" value="' . $payment_amount . '">';
+			//remove_action('gform_payment_amount', array($this, 'admin_edit_payment_amount'));
+			return $input;
+		} else {
+			return $payment_amount;
+		}
 	}
 
 	public function admin_update_payment( $form, $entry_id ) {
