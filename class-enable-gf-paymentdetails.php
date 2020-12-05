@@ -137,8 +137,8 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 		//create drop down for payment status
 		if (strpos($payment_status, '<select') === false) {
 			$payment_string = '<select id="payment_status" name="payment_status">';
-			$payment_string .= '<option value="' . $payment_status . '" selected>' . $payment_status . '</option>';
-			$payment_string .= '<option value="Paid">Paid</option>';
+			$payment_string .= '<option value="Processing"'.($payment_status=='Processing'?' selected':'').'>Processing</option>';
+			$payment_string .= '<option value="Paid"'.($payment_status=='Paid'?' selected':'').'>Paid</option>';
 			$payment_string .= '</select>';
 			//remove_action('gform_payment_status', array($this, 'admin_edit_payment_status'));
 			return $payment_string;
