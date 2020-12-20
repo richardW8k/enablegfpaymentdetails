@@ -109,10 +109,11 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 
 	public function add_payment_details_meta_box( $meta_boxes, $entry, $form ) {
 		if ( ! isset( $meta_boxes['payment'] ) && $this->payment_details_enabled( $form ) ) {
-			if (!isset($entry['payment_status'])) {
-				GFAPI::update_entry_property( $entry['id'], 'payment_status', 'Processing' );
-				$entry['payment_status']   = 'Processing';
-			}
+			//We maybe shouldn't override status here, because some entries do have a blank status
+			//if (!isset($entry['payment_status'])) {
+			//	GFAPI::update_entry_property( $entry['id'], 'payment_status', 'Processing' );
+			//	$entry['payment_status']   = 'Processing';
+			//}
 			if (!isset($entry['transaction_type'])) {
 				GFAPI::update_entry_property( $entry['id'], 'transaction_type', '1' );
 				$entry['transaction_type'] = '1';
@@ -136,9 +137,11 @@ class Enable_GF_PaymentDetails extends GFAddOn {
 
 		//create drop down for payment status
 		if (strpos($payment_status, '<select') === false) {
+			$status = array ('', 'Processing', 'Paid', 'Active');
 			$payment_string = '<select id="payment_status" name="payment_status">';
-			$payment_string .= '<option value="Processing"'.($payment_status=='Processing'?' selected':'').'>Processing</option>';
-			$payment_string .= '<option value="Paid"'.($payment_status=='Paid'?' selected':'').'>Paid</option>';
+			foreach ($status as $s) {
+				$payment_string .= '<option value="'.$s.'"'.($payment_status==$s?' selected':'').'>'.$s.'</option>';
+			}
 			$payment_string .= '</select>';
 			//remove_action('gform_payment_status', array($this, 'admin_edit_payment_status'));
 			return $payment_string;
